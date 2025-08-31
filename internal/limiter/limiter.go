@@ -24,14 +24,14 @@ func NewRateLimiter(client *redis.Client) *RateLimiter {
 }
 
 func (rl *RateLimiter) Allow(ctx context.Context, key string, limit int, rate float64) (bool, error) {
-	args := []interface{}{limit, rate, float64(time.Now().UnixNano()) / 1e9}
+	args := []any{limit, rate, float64(time.Now().UnixNano()) / 1e9}
 
 	res, err := rl.script.Run(ctx, rl.client, []string{key}, args...).Result()
 	if err != nil {
 		return false, err
 	}
 
-	resultSlice := res.([]interface{})
+	resultSlice := res.([]any)
 
 	allowed := (resultSlice[0].(int64) == 1)
 

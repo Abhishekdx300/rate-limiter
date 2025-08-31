@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package ratelimit;
+
+option go_package = "github.com/Abhishekdx300/rate-limiter/api/proto";
+
+service RateLimiterService{
+    // based on token bucket
+    rpc ShouldAllow(ShouldAllowRequest) returns (ShouldAllowResponse){}
+}
+
+message ShouldAllowRequest {
+    string key = 1;
+    int64 limit = 2;
+    double rate = 3;
+}
+
+message ShouldAllowResponse {
+    bool allowed = 1;
+}
