@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 
 	pb "github.com/Abhishekdx300/rate-limiter/api/proto"
 	"github.com/Abhishekdx300/rate-limiter/internal/limiter"
@@ -23,8 +24,12 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "localhost:6379"
+	}
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: redisAddr,
 	})
 
 	if _, err := rdb.Ping(context.Background()).Result(); err != nil {
@@ -38,7 +43,7 @@ func main() {
 	// grpc server
 
 	s := grpc.NewServer()
-	grpcServer := server.NewGrpcServer(rateLimiter)
+	grpcServer := server.NewGrpcServer(rateLimiter, 50)
 	pb.RegisterRateLimiterServiceServer(s, grpcServer)
 
 	fmt.Printf("grpc server listening at %v\n", lis.Addr())
